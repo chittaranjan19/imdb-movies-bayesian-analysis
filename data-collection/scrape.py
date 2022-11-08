@@ -117,7 +117,7 @@ df = pd.DataFrame(
 )
 df.to_csv("data.csv", index=False)
 out = open("out", "w")
-for _, row in movies_links.head(20).iterrows():
+for _, row in movies_links.iterrows():
     print(_, row["imdbId"], file=out, flush=True)
     try:
         d = get_info(row)
