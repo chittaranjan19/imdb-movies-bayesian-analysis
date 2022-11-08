@@ -98,9 +98,6 @@ def get_info(row):
     return d
 
 # TODO:
-# - fetch list of imdb titles
-# - for-loop to create `resp` dict for each movie
-# - save as csv or json
 # - minor cleaning may be required, TBD after scraping ends
 
 df = pd.DataFrame(
@@ -128,5 +125,3 @@ for _, row in movies_links.head(20).iterrows():
     except:
         print("ERROR", row["imdbId"], file=out, flush=True)
         continue
-# movies_links.head().apply(get_info, axis=1).apply(add_dict_to_df, axis=1)
-# print(df)
