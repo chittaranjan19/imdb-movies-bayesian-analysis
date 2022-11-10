@@ -6,10 +6,14 @@ import pandas as pd
 import time
 import re
 
-movies = pd.read_csv("../ml-25m/movies.csv", dtype=str)
-links = pd.read_csv("../ml-25m/links.csv", dtype=str)
+movies = pd.read_csv("/Users/brendanmatthys/Desktop/imdb-movies-bayesian-analysis/data-collection/movies.csv", dtype=str)
+links = pd.read_csv("/Users/brendanmatthys/Desktop/imdb-movies-bayesian-analysis/data-collection/links.csv", dtype=str)
 movies_links = movies.merge(links, on="movieId")
 http = urllib3.PoolManager()
+
+#start at 21415
+movies_links
+
 
 def get_info(row):
     global http
