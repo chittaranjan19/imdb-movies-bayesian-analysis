@@ -104,12 +104,12 @@ df = pd.DataFrame(
     {
         "imdb_id": [], 
         "title": [], 
+        "genres": [], 
         "release_date": [], 
         "country": [],
         "production_companies": [],
         "budget": [],
         "revenue": [], 
-        "genres": [], 
         "duration": [], 
         "actors": [], 
         "director": []
