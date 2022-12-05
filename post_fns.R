@@ -1,3 +1,14 @@
+library(LaplacesDemon)
+
+# We need to define some parameters:
+# - parameters "a" and "b" for "u2"
+# - "delta" and "lambda" for "v"
+# - "t0" and "S0" for T_mat
+# We also need to define 
+# - "m": the number of groups we want to compare
+# - "n_1", ..., "n_m": the number of observations for each group
+# - "
+
 sample_post_beta = function(theta, T_mat, y_g, X_g, sigma2_g) {
     new_cov = solve(solve(T_mat) + t(X)%*%X/sigma2_g)
     new_mean = new_cov%*%(solve(T_mat)%*%theta + t(X)%*%y/sigma2_g)
@@ -18,4 +29,33 @@ sample_post_v = function(old_v) {
     check = log(runif(1)) < log_ratio
     new_v = ifelse(test = check, yes = prop_value, no = old_v)
     return(new_v)
+}
+
+sample_post_u2 = function(v, sigma2_vec) {
+    new_u2 = rgamma(
+        n = 1, 
+        shape = a + m*v/2, 
+        rate = b + (v/2)*sum(sigma2_vec)
+    )
+    return(new_u2)
+}
+
+get_SSR_beta_g = function(y_g, beta_g, X_g) {
+    new_resids_g = y_g - beta_g%*%X_g
+    new_SSR_beta_g = sum(new_resids_g^2)
+    return(new_SSR_beta_g)
+}
+
+sample_post_sigma2_g = function(v, u2, n_g, SSR_beta_g) {
+    new_shape = (v + n_j)/2
+    new_rate = (v*u2 + SSR_beta_g)/2
+    new_sigma2_g = rgamma(n = 1, shape = new_shape, rate = new_rate)
+    return(new_sigma2_g)
+}
+
+sample_post_T_mat = function(beta_g, theta_vec) {
+    S_theta = (beta_g - theta)%*%t(beta_g - theta)
+    new_S = solve(S0 + S_theta) # Inverse of the sum of S_0 and S_theta
+    new_T_mat = rinvwishart(nu = t0 + m, S = new_S)
+    return(new_T_mat)
 }
