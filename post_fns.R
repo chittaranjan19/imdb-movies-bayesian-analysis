@@ -19,3 +19,10 @@ sample_post_v = function(old_v) {
     new_v = ifelse(test = check, yes = prop_value, no = old_v)
     return(new_v)
 }
+
+sample_post_theta = function(mu_0, w_0, beta_vec, X_g, sigma2_g) {
+    new_cov = solve(solve(w_0) + t(X)%*%X/sigma2_g)
+    new_mean = new_cov%*%(solve(w_0)%*%mu_0 + t(X)%*%beta_vec/sigma2_g)
+    new_theta = rmvnorm(1, mean = new_mean, sigma = new_cov)
+    return(new_theta)
+}
