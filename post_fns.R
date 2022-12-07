@@ -4,7 +4,7 @@ library(mvtnorm)
 # We need to define some parameters:
 # - parameters "a" and "b" for "u2"
 # - "delta" and "lambda" for "v"
-# - "t0" and "S0" for T_mat
+# - "t_0" and "S_0" for T_mat
 # We also need to define 
 # - "m": the number of groups we want to compare
 # - "n_1", ..., "n_m": the number of observations for each group
@@ -50,14 +50,19 @@ get_SSR_beta_g = function(y_g, beta_g, X_g) {
 sample_post_sigma2_g = function(v, u2, n_g, SSR_beta_g) {
     new_shape = (v + n_j)/2
     new_rate = (v*u2 + SSR_beta_g)/2
-    new_sigma2_g = rgamma(n = 1, shape = new_shape, rate = new_rate)
+    new_sigma2_g = rinvgamma(n = 1, shape = new_shape, scale = new_rate)
     return(new_sigma2_g)
 }
 
-sample_post_T_mat = function(beta_g, theta_vec) {
-    S_theta = (beta_g - theta)%*%t(beta_g - theta)
-    new_S = solve(S0 + S_theta) # Inverse of the sum of S_0 and S_theta
-    new_T_mat = rinvwishart(nu = t0 + m, S = new_S)
+sample_post_T_mat = function(beta_mat, theta_vec) {
+    S_theta = matrix(NA_real_, nrow = ncol(beta_mat), ncol = ncol(beta_mat))
+    for (i in 1:nrow(beta_mat)) {
+        beta_g = beta_mat[i,]
+        S_theta = S_theta + (beta_g - theta_vec)%*%t(beta_g - theta_vec)
+    }
+    # S_theta = (beta_g - theta_vec)%*%t(beta_g - theta_vec)
+    new_S = solve(S_0 + S_theta) # Inverse of the sum of S_0 and S_theta
+    new_T_mat = rinvwishart(nu = t_0 + m, S = new_S)
     return(new_T_mat)
 }
 
