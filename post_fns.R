@@ -67,8 +67,12 @@ sample_post_T_mat = function(beta_mat, theta_vec) {
 }
 
 sample_post_theta = function(beta_vec, X_g, sigma2_g) {
-    new_cov = solve(solve(W_0) + t(X_g)%*%X_g/sigma2_g)
-    new_mean = new_cov%*%(solve(W_0)%*%mu_0 + t(X_g)%*%beta_vec/sigma2_g)
+    new_cov = solve(solve(W_0) + m * solve(T))
+    new_mean = new_cov * (solve(W_0)*mu_0 + solve(T)*colSums(beta_vec))
     new_theta = rmvnorm(1, mean = new_mean, sigma = new_cov)
     return(new_theta)
 }
+
+
+
+
