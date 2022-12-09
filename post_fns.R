@@ -42,22 +42,22 @@ sample_post_u2 = function(v, sigma2_vec) {
 }
 
 get_SSR_beta_g = function(y_g, beta_g, X_g) {
-    new_resids_g = y_g - beta_g%*%X_g
+    new_resids_g = y_g - X_g%*%beta_g
     new_SSR_beta_g = sum(new_resids_g^2)
     return(new_SSR_beta_g)
 }
 
 sample_post_sigma2_g = function(v, u2, n_g, SSR_beta_g) {
-    new_shape = (v + n_j)/2
+    new_shape = (v + n_g)/2
     new_rate = (v*u2 + SSR_beta_g)/2
     new_sigma2_g = rinvgamma(n = 1, shape = new_shape, scale = new_rate)
     return(new_sigma2_g)
 }
 
 sample_post_T_mat = function(beta_mat, theta_vec) {
-    S_theta = matrix(NA_real_, nrow = ncol(beta_mat), ncol = ncol(beta_mat))
+    S_theta = matrix(0, nrow = ncol(beta_mat), ncol = ncol(beta_mat))
     for (i in 1:nrow(beta_mat)) {
-        beta_g = beta_mat[i,]
+        beta_g = unname(beta_mat[i,])
         S_theta = S_theta + (beta_g - theta_vec)%*%t(beta_g - theta_vec)
     }
     # S_theta = (beta_g - theta_vec)%*%t(beta_g - theta_vec)
@@ -68,9 +68,9 @@ sample_post_T_mat = function(beta_mat, theta_vec) {
 
 sample_post_theta = function(beta_mat, T_mat) {
     new_cov = solve(solve(W_0) + m * solve(T_mat))
-    new_mean = new_cov * (solve(W_0)*mu_0 + solve(T_mat)*colSums(beta_mat))
+    new_mean = new_cov %*% (solve(W_0)%*%mu_0 + solve(T_mat)%*%colSums(beta_mat))
     new_theta = rmvnorm(1, mean = new_mean, sigma = new_cov)
-    return(new_theta)
+    return(as.vector(new_theta))
 }
 
 
