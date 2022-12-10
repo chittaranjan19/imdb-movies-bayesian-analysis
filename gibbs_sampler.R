@@ -1,10 +1,13 @@
 library(tidyverse)
 source("post_fns.R")
 
+movies = read_csv("data-collection/data_clean.csv")
+
 set.seed(52996)
-training_data <- data %>%
-    group_by(genres)%>%
-    slice_sample(prop = 0.7)
+training_data <- movies %>%
+    group_by(genres) %>%
+    slice_sample(prop = 0.7) %>%
+    ungroup()
 
 data_set = training_data
 
@@ -87,9 +90,9 @@ for (s in 1:n_sims) {
     for (j in 1:m) {
         g = genres[j]
         # filter only rows of gender g
-        y_g = filter(movies, genres == g)[, "revenue", drop = TRUE]
+        y_g = filter(data_set, genres == g)[, "revenue", drop = TRUE]
         n_g = length(y_g)
-        X_g = movies %>% 
+        X_g = data_set %>% 
             filter(genres == g) %>% 
             select(-c("revenue", "genres"))
         X_g = as.matrix(X_g)
@@ -104,4 +107,4 @@ for (s in 1:n_sims) {
         beta_array[s, , j] = beta_mat[j,]
     }
 }
-Sys.time() - tmp
+save.image("gibbs_env.RData")
