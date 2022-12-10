@@ -26,7 +26,7 @@ genres = levels(data_set$genres)
 # X = data_set %>% select(-revenue)
 # X[, "intercept"] = 1
 
-n_sims = 10 # Number of simulations
+n_sims = 10000 # Number of simulations
 m = length(genres) # number of genres
 q = ncol(data_set) - 2 # number of explanatory variables (including intercept)
 # n_g = c(1,1,1) # vector of number of data_set from each genre
@@ -40,7 +40,7 @@ W_0 = diag(x = 1, nrow = q, ncol = q) # Matrix of covariances for distribution o
 S_0 = diag(x = 1, nrow = q, ncol = q)# Matrix for distribution of T
 t_0 = q # Scalar degrees of freedom for distribution of T
 
-set.seed(551)
+set.seed(1210)
 # Sampling initial values from prior distributions
 u2 = rgamma(1, shape = a, rate = b)
 v = rgamma(1, shape = delta, rate = lambda)
@@ -62,12 +62,14 @@ beta_array = array(data = NA_real_, dim = c(n_sims, q, m)) # This is an array
 # and matrix (third dimension) number k corresponds to genre.
 tmp = Sys.time()
 for (s in 1:n_sims) {
+    print(s)
     # Update u2
     u2 = sample_post_u2(v, sigma2_vec)
     # Update v
     v = sample_post_v(old_v = v, u2 = u2, sigma2_vec = sigma2_vec)
     # Update sigma2
     for (j in 1:m) {
+        
         g = genres[j]
         # filter only rows of gender g
         y_g = filter(data_set, genres == g)[, "revenue", drop = TRUE]
