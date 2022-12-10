@@ -1,26 +1,32 @@
 library(tidyverse)
 source("post_fns.R")
 
+set.seed(52996)
+training_data <- data %>%
+    group_by(genres)%>%
+    slice_sample(prop = 0.7)
 
-movies = read_csv("data12-10.csv")[, -1] %>%
+data_set = training_data
+
+data_set = data_set %>%
     mutate(genres = as.factor(genres)) %>%
     select(c("revenue", "genres", "budget", "duration")) %>%
     mutate(intercept = 1)
     # mutate(tmp_value = TRUE)
 
-genres = levels(movies$genres)
+genres = levels(data_set$genres)
 
-# movies = movies %>%
+# data_set = data_set %>%
 #     pivot_wider(names_from = genres, values_from = tmp_value) %>%
 #     replace(is.na(.), FALSE)
 
-# X = movies %>% select(-revenue)
+# X = data_set %>% select(-revenue)
 # X[, "intercept"] = 1
 
 n_sims = 10 # Number of simulations
 m = length(genres) # number of genres
-q = ncol(movies) - 2 # number of explanatory variables (including intercept)
-# n_g = c(1,1,1) # vector of number of movies from each genre
+q = ncol(data_set) - 2 # number of explanatory variables (including intercept)
+# n_g = c(1,1,1) # vector of number of data_set from each genre
 a = 5 # scalar for distribution of u2
 b = 1 # scalar for distribution of u2
 delta = 5 # Scalar for distribution of v
@@ -61,9 +67,9 @@ for (s in 1:n_sims) {
     for (j in 1:m) {
         g = genres[j]
         # filter only rows of gender g
-        y_g = filter(movies, genres == g)[, "revenue", drop = TRUE]
+        y_g = filter(data_set, genres == g)[, "revenue", drop = TRUE]
         n_g = length(y_g)
-        X_g = movies %>% 
+        X_g = data_set %>% 
             filter(genres == g) %>% 
             select(-c("revenue", "genres"))
         X_g = as.matrix(X_g)
