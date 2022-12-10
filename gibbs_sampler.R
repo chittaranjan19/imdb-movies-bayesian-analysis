@@ -42,7 +42,7 @@ W_0 = diag(x = 1, nrow = q, ncol = q) # Matrix of covariances for distribution o
 S_0 = diag(x = 1, nrow = q, ncol = q)# Matrix for distribution of T
 t_0 = q # Scalar degrees of freedom for distribution of T
 
-set.seed(551)
+set.seed(1210)
 # Sampling initial values from prior distributions
 u2 = rgamma(1, shape = a, rate = b)
 v = rgamma(1, shape = delta, rate = lambda)
@@ -71,6 +71,7 @@ for (s in 1:n_sims) {
     v = sample_post_v(old_v = v, u2 = u2, sigma2_vec = sigma2_vec)
     # Update sigma2
     for (j in 1:m) {
+        
         g = genres[j]
         # filter only rows of gender g
         y_g = filter(data_set, genres == g)[, "revenue", drop = TRUE]
