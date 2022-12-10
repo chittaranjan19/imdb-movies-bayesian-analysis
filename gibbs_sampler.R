@@ -13,8 +13,10 @@ data_set = training_data
 
 data_set = data_set %>%
     mutate(genres = as.factor(genres)) %>%
-    select(c("revenue", "genres", "budget", "duration")) %>%
-    mutate(intercept = 1)
+    mutate(intercept = 1) %>% 
+    select(c(
+        "genres", "intercept", "revenue", "budget", "duration", "is_foreign"
+    )) %>%
     # mutate(tmp_value = TRUE)
 
 genres = levels(data_set$genres)
@@ -26,7 +28,7 @@ genres = levels(data_set$genres)
 # X = data_set %>% select(-revenue)
 # X[, "intercept"] = 1
 
-n_sims = 10 # Number of simulations
+n_sims = 10000 # Number of simulations
 m = length(genres) # number of genres
 q = ncol(data_set) - 2 # number of explanatory variables (including intercept)
 # n_g = c(1,1,1) # vector of number of data_set from each genre
@@ -62,6 +64,7 @@ beta_array = array(data = NA_real_, dim = c(n_sims, q, m)) # This is an array
 # and matrix (third dimension) number k corresponds to genre.
 tmp = Sys.time()
 for (s in 1:n_sims) {
+    print(s)
     # Update u2
     u2 = sample_post_u2(v, sigma2_vec)
     # Update v
@@ -107,4 +110,4 @@ for (s in 1:n_sims) {
         beta_array[s, , j] = beta_mat[j,]
     }
 }
-save.image("gibbs_env.RData")
+save.image("gibbs_env_abner.RData")
