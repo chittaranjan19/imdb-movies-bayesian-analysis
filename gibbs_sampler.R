@@ -42,7 +42,7 @@ W_0 = diag(x = 1, nrow = q, ncol = q) # Matrix of covariances for distribution o
 S_0 = diag(x = 1, nrow = q, ncol = q)# Matrix for distribution of T
 t_0 = q # Scalar degrees of freedom for distribution of T
 
-set.seed(1210)
+set.seed(551)
 # Sampling initial values from prior distributions
 u2 = rgamma(1, shape = a, rate = b)
 v = rgamma(1, shape = delta, rate = lambda)
