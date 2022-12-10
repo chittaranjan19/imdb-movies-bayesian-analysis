@@ -1,0 +1,292 @@
+---
+title: "551_eda"
+author: "Brendan Matthys"
+date: "12/9/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+```
+
+```{r}
+tidyselect::starts_with(data$budget,vars = '$')
+```
+
+
+```{r}
+#subset(data, grepl('^$',data$budget))
+
+
+data
+
+```
+
+
+```{r}
+data <- read.csv('/Users/brendanmatthys/Desktop/imdb-movies-bayesian-analysis/data-collection/cleaned_data.csv')
+
+data$budget[data$budget == ""] <- NA
+data <- data|>
+  filter(!is.na(budget))
+
+
+data <- data|>
+  filter(stringr::str_starts(budget, fixed('$')))
+#data <- subset(data, str_contains(data$budget,'$'))
+
+data$budget <- parse_number(data$budget, na = c("", "NA"))
+data$revenue <- parse_number(data$revenue, na = c("", "NA"))
+
+
+data = subset(data, select = c(-X))
+data <- data|>
+  filter(!is.na(revenue))
+
+
+
+data <- subset(data, genres %in% c('Drama','Comedy','Horror','Documentary','Thriller',
+'Action','Romance', 'Western'))
+
+data$release_date <- as.Date(data$release_date)
+```
+
+```{r}
+data
+```
+
+```{r}
+
+
+#data$budget <- data$budget %>% mutate_all(na_if,"")
+
+#
+data
+```
+
+
+```{r}
+
+
+
+
+
+
+#data <- subset(data, main_country = "United States")
+
+
+
+```
+
+```{r}
+data
+```
+
+
+
+```{r}
+
+data$release_month <- as.factor(data$release_month)
+```
+
+
+Budget looks ugly rn. let's change that. also date isn't a date yet 
+```{r}
+# data$revenue <- as.integer(data$revenue)
+# data$budget <- as.integer(data$budget)
+
+
+
+
+```
+
+
+
+```{r}
+set.seed(52996)
+training_data <- data |>
+  group_by(genres)|>
+slice_sample(prop = 0.7) 
+
+training_data
+```
+
+
+```{r}
+testing_data <- anti_join(data, training_data, by = "imdb_id")
+testing_data
+```
+
+
+```{r}
+data
+```
+
+```{r}
+#is there a correlation between budget and revenue?
+cor(data$budget, data$revenue, use = "complete.obs")
+```
+That is interesting, I was expecting some sort of correlation.
+
+```{r}
+summary(lm(revenue~budget, data = data))
+```
+But budget does have a significant linear relationship to revenue. However, that coefficient is nearly 0.
+
+
+
+
+```{r}
+revenue_month <- training_data |>
+  group_by(release_month)|>
+  summarise(median(revenue))
+  #arrange(as.integer(release_month))
+colnames(revenue_month) <- c('release_month', 'median_revenue')
+head(revenue_month,12)
+```
+
+```{r}
+data |>
+  group_by(release_month)|>
+  summarise(n(),mean(revenue, na.rm = TRUE),median(revenue, na.rm = TRUE))
+```
+
+
+
+
+
+Now let's examine to see if the "summer blockbuster" trend is legit.
+
+```{r}
+training_data
+```
+
+
+```{r}
+ggplot(data = training_data, aes(x = reorder(release_month,as.integer(release_month)), y = median(revenue))) + geom_bar(stat = "identity") + labs(title = "Median Opening Weekend Revenue per Month",x = "Month", y = "Median Opening Weekend Revenue") + facet_wrap(~genres)
+```
+
+
+
+Yeah, looks to be legit. The revenue for summer is much higher than the other months.
+
+I'm curious if this trend exists per year as well. I think inflation would increase the opening weekend revenue, but let's find out 
+
+```{r}
+revenue_year <- training_data |>
+  group_by(release_year)|>
+  summarise(median(revenue))|>
+  arrange(as.integer(release_year))
+colnames(revenue_year) <- c('release_year', 'median_revenue')
+revenue_year
+```
+
+
+
+
+
+```{r}
+ggplot(training_data) + geom_boxplot(aes(x = release_month, y = revenue)) +  ylim(c(0,2500000)) +  facet_wrap(~genres)
+#boxplot(as.integer(training_data$release_month))
+```
+
+```{r}
+ggplot(training_data) + geom_point(aes(x = duration, y = revenue))  + ylim(c(0,2500000)) +  facet_wrap(~genres, scale = "free")
+```
+
+
+
+
+```{r}
+ggplot(training_data) + geom_point(aes(x = budget, y = revenue))   +  facet_wrap(~genres)
+```
+```{r}
+ggplot(training_data) + geom_point(aes(x = release_year, y = revenue))   +  facet_wrap(~genres)
+```
+
+```{r}
+data$release_year <- as.integer(data$release_year)
+```
+
+
+```{r}
+subset(training_data) |>
+  group_by(genres,release_month) |>
+  summarise(n())
+  
+```
+
+This is hard to examine with the one movie in 1905. For visualization purposes let's exclude that right now.
+
+```{r}
+ggplot(data = subset(revenue_year, release_year > 1960), aes(x = reorder(release_year,as.integer(release_year)), y = median_revenue)) + geom_point(stat = "identity") + labs(title = "Median Opening Weekend Revenue per Year",x = "Year", y = "Median Opening Weekend Revenue") 
+```
+
+
+This is very odd, let's see how many movies we have per year per se
+
+```{r}
+data |>
+  group_by(release_year)|>
+  summarise(n)|>
+  arrange(as.integer(release_year))
+```
+We only want single genre movies
+```{r}
+genrestotal <- data |>
+  group_by(genres)|>
+  summarise(n())|>
+  filter(!str_detect(genres, ';'))
+
+colnames(genrestotal) <- c('genre','total')
+genrestotal|>
+  arrange(-total)
+
+```
+
+We shall use Drama, Comedy, and Horror. Documentary won't really have too much of a box office presence here.
+
+```{r}
+ggplot()
+```
+
+
+```{r}
+# ggplot(subset(training_data, genres %in% c('Drama','Comedy','Horror')), aes(x=release_date, y=revenue, color = genres)) +
+#   geom_point() + 
+#   xlab("Date") + ylab("Revenue") + labs(title = "Largest Opening Revenues") +geom_text(training_data,revenue>51000000),
+#             aes(label=title,size = 3, vjust = 2, hjust = 1)
+
+```
+
+
+```{r}
+subset(training_data, release_month == 8) |>
+  arrange(-revenue)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+ggplot(training_data, aes(x = duration, y = revenue)) + geom_point(stat = "identity") + labs(title = "Median Opening Weekend Revenue per Year",x = "Duration", y = "Median Opening Weekend Revenue") 
+```
+
+
+
