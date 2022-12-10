@@ -2,7 +2,7 @@ library(tidyverse)
 source("post_fns.R")
 
 
-movies = read_csv("data-collection/data_clean.csv")[, -1] %>%
+movies = read_csv("data12-10.csv")[, -1] %>%
     mutate(genres = as.factor(genres)) %>%
     select(c("revenue", "genres", "budget", "duration")) %>%
     mutate(intercept = 1)
@@ -17,7 +17,7 @@ genres = levels(movies$genres)
 # X = movies %>% select(-revenue)
 # X[, "intercept"] = 1
 
-n_sims = 100 # Number of simulations
+n_sims = 10 # Number of simulations
 m = length(genres) # number of genres
 q = ncol(movies) - 2 # number of explanatory variables (including intercept)
 # n_g = c(1,1,1) # vector of number of movies from each genre
@@ -35,10 +35,10 @@ set.seed(551)
 # Sampling initial values from prior distributions
 u2 = rgamma(1, shape = a, rate = b)
 v = rgamma(1, shape = delta, rate = lambda)
-sigma2_vec = rinvgamma(3, shape = v/2, scale = v*u2/2)
+sigma2_vec = rinvgamma(m, shape = v/2, scale = v*u2/2)
 theta = as.vector(rmvnorm(1, mean = mu_0, sigma = W_0))
 T_mat = rinvwishart(nu = t_0, W_0)
-beta_mat = rmvnorm(3, mean = theta, sigma = T_mat)
+beta_mat = rmvnorm(m, mean = theta, sigma = T_mat)
 colnames(beta_mat) = as.character(seq(1, ncol(beta_mat)))
 
 # Places to store variables
