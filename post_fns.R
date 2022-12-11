@@ -25,10 +25,15 @@ log_dens_v = function(v, u2, sigma2_vec) {
 
 sample_post_v = function(old_v, u2, sigma2_vec) {
     prop_value = rnorm(n = 1, mean = old_v, sd = 2)
-    log_ratio = log_dens_v(old_v, u2, sigma2_vec) - 
-        log_dens_v(prop_value, u2, sigma2_vec)
-    check = log(runif(1)) < log_ratio
-    new_v = ifelse(test = check, yes = prop_value, no = old_v)
+    if (prop_value <= 0) {
+        # v has to be greater than zero
+        new_v = old_v
+    } else {
+        log_ratio = log_dens_v(old_v, u2, sigma2_vec) - 
+            log_dens_v(prop_value, u2, sigma2_vec)
+        check = log(runif(1)) < log_ratio
+        new_v = ifelse(test = check, yes = prop_value, no = old_v)
+    }
     return(new_v)
 }
 
@@ -36,14 +41,16 @@ sample_post_u2 = function(v, sigma2_vec) {
     new_u2 = rgamma(
         n = 1, 
         shape = a + m*v/2, 
-        rate = b + (v/2)*sum(sigma2_vec)
+        rate = b + (1/2)*sum(1 / sigma2_vec) # See main book, p. 144
+        # rate = b + (v/2)*sum(sigma2_vec) # Maybe "v" should not be there
     )
     return(new_u2)
 }
 
 get_SSR_beta_g = function(y_g, beta_g, X_g) {
-    new_resids_g = y_g - X_g%*%beta_g
-    new_SSR_beta_g = sum(new_resids_g^2)
+    # new_resids_g = y_g - t(beta_g)%*%X_g
+    # new_SSR_beta_g = sum(new_resids_g^2)
+    new_SSR_beta_g = t(y_g - X_g%*%beta_g) %*% (y_g - X_g%*%beta_g)
     return(new_SSR_beta_g)
 }
 
