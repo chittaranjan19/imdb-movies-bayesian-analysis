@@ -11,7 +11,7 @@ library(mvtnorm)
 # - "
 
 sample_post_beta = function(theta, T_mat, y_g, X_g, sigma2_g) {
-    new_cov = solve(solve(T_mat) + t(X_g)%*%X_g/sigma2_g)
+    new_cov = solve((solve(T_mat)*sigma2_g + t(X_g)%*%X_g), tol = 1e-17)*sigma2_g
     new_mean = new_cov%*%(solve(T_mat)%*%theta + t(X_g)%*%y_g/sigma2_g)
     new_beta = rmvnorm(1, mean = new_mean, sigma = new_cov)
     return(new_beta)
@@ -62,14 +62,15 @@ sample_post_T_mat = function(beta_mat, theta_vec) {
     }
     # S_theta = (beta_g - theta_vec)%*%t(beta_g - theta_vec)
     new_S = solve(S_0 + S_theta) # Inverse of the sum of S_0 and S_theta
-    new_T_mat = rinvwishart(nu = t_0 + m, S = new_S)
+    # new_T_mat = rinvwishart(nu = t_0 + m, S = new_S)
+    new_T_mat = solve(rwishart(nu=t_0 + m, S=as.symmetric.matrix(new_S, k=NULL)))
     return(new_T_mat)
 }
 
 sample_post_theta = function(beta_mat, T_mat) {
     new_cov = solve(solve(W_0) + m * solve(T_mat))
     new_mean = new_cov %*% (solve(W_0)%*%mu_0 + solve(T_mat)%*%colSums(beta_mat))
-    new_theta = rmvnorm(1, mean = new_mean, sigma = new_cov)
+    new_theta = rmvnorm(1, mean = new_mean, sigma = as.symmetric.matrix(new_cov, k=NULL))
     return(as.vector(new_theta))
 }
 
