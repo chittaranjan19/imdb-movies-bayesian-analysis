@@ -31,7 +31,7 @@ genres = levels(data_set$genres)
 # X = data_set %>% select(-revenue)
 # X[, "intercept"] = 1
 
-n_sims = 100000 # Number of simulations
+n_sims = 1000 # Number of simulations
 m = length(genres) # number of genres
 q = ncol(data_set) - 2 # number of explanatory variables (including intercept)
 # n_g = c(1,1,1) # vector of number of data_set from each genre

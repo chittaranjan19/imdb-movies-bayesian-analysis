@@ -29,8 +29,8 @@ sample_post_v = function(old_v, u2, sigma2_vec) {
         # v has to be greater than zero
         new_v = old_v
     } else {
-        log_ratio = log_dens_v(old_v, u2, sigma2_vec) - 
-            log_dens_v(prop_value, u2, sigma2_vec)
+        log_ratio = log_dens_v(prop_value, u2, sigma2_vec) - 
+            log_dens_v(old_v, u2, sigma2_vec)
         check = log(runif(1)) < log_ratio
         new_v = ifelse(test = check, yes = prop_value, no = old_v)
     }
