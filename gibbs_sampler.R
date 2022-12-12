@@ -31,25 +31,25 @@ genres = levels(data_set$genres)
 # X = data_set %>% select(-revenue)
 # X[, "intercept"] = 1
 
-n_sims = 10000 # Number of simulations
+n_sims = 500 # Number of simulations
 m = length(genres) # number of genres
 q = ncol(data_set) - 2 # number of explanatory variables (including intercept)
 # n_g = c(1,1,1) # vector of number of data_set from each genre
-a = (1.3e+5)^2 # scalar for distribution of u2
+a = (1.3e+7)^2 # scalar for distribution of u2
 b = 4 # scalar for distribution of u2
-delta = 12 # Scalar for distribution of v
-lambda = 2 # Scalar for distribution of v
-mu_0 = c(mean(movies$revenue)/4, 0.5, -50000)
+delta = 14000 # Scalar for distribution of v
+lambda = 10 # Scalar for distribution of v
+mu_0 = c(mean(movies$revenue), 0.5, -100000)
 # mu_0 = c(mean(movies$revenue), 1, -50000, 0) # Vector of means for distribution of theta
 W_0 = matrix(0, nrow = q, ncol = q) # Matrix of covariances for distribution of theta
-diag(W_0) = c(1e+12, 0.1^2, 25000^2)
+diag(W_0) = c(1e+12, 0.15^2, 35000^2)
 # diag(W_0) = c(1e+12, 0.4^2, 25000^2, 1000000)
 
 # inv_W_0 = solve(W_0)
 t_0 = q + 2 # Scalar degrees of freedom for distribution of T
-S_0 = (t_0 - q - 1)*diag(c(1e+12, 0.1^2, 25000^2))# Matrix for distribution of T 
+S_0 = (t_0 - q - 1)*diag(c(1e+12, 0.15^2, 35000^2))# Matrix for distribution of T 
 
-set.seed(1210)
+set.seed(551)
 # Sampling initial values from prior distributions
 u2 = rgamma(1, shape = a, rate = b)
 v = rgamma(1, shape = delta, rate = lambda)
@@ -119,4 +119,4 @@ for (s in 1:n_sims) {
         beta_array[s, , j] = beta_mat[j,]
     }
 }
-save.image("gibbs_env_abner.RData")
+save.image("gibbs_env_abner_2.RData")
