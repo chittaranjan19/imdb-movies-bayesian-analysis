@@ -31,7 +31,7 @@ genres = levels(data_set$genres)
 # X = data_set %>% select(-revenue)
 # X[, "intercept"] = 1
 
-n_sims = 10000 # Number of simulations
+n_sims = 25000 # Number of simulations
 m = length(genres) # number of genres
 q = ncol(data_set) - 2 # number of explanatory variables (including intercept)
 # n_g = c(1,1,1) # vector of number of data_set from each genre
@@ -119,4 +119,4 @@ for (s in 1:n_sims) {
         beta_array[s, , j] = beta_mat[j,]
     }
 }
-save.image("gibbs_env_abner.RData")
+save.image("gibbs_env_chitt.RData")
